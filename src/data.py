@@ -1,3 +1,6 @@
+import pandas as pd
+import requests
+
 def get_ticker_cik_map():
     """Retrieves the SEC's ticker-CIK mapping file as a dataframe."""
     df = pd.read_csv('https://www.sec.gov/include/ticker.txt', sep='\t', names=['ticker', 'cik'])
