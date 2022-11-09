@@ -80,7 +80,7 @@ def get_concept(headers, taxonomy, tag, unit, period):
         df['period'] = period
         return df
 
-def get_all_concepts(period, schema):
+def get_all_concepts(headers, period, schema):
     """Calls the SEC's frames API to get data on the given period and concepts listed in the provided schema."""
     frames = []
     for i, row in schema.iterrows(): 
