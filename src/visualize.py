@@ -62,3 +62,11 @@ def plot_corr_matrix(X, title, **kwargs):
     )
     plt.title(title)
     plt.show()
+
+def plot_loadings(pca_results, component, **kwargs):
+    fig, ax = plt.subplots(**kwargs)
+    ax = pca_results['loadings'].loc[component].sort_values().plot(kind='barh')
+    plt.xlabel('Loading')
+    title = "{0} Loadings".format(component)
+    plt.title(title)
+    plt.show()
