@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from src.data import get_all_concepts
+
+headers = {
+    'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
+}
 
 schema = pd.DataFrame({
     'taxonomy': np.repeat('us-gaap', 11),
@@ -32,4 +37,6 @@ schema = pd.DataFrame({
     ]
 })
 
-schema
+df = get_all_concepts(headers, 'CY2020Q4I', schema)
+
+df
