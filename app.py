@@ -7,6 +7,17 @@ headers = {
     'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
 }
 
+def year_to_period(year):
+    return 'CY' + str(year) + 'Q4I'
+
+year = st.select_slider(
+    'Select Year',
+    options=np.arange(2000, 2022),
+    value=2020
+)
+
+period = year_to_period(year)
+
 schema = pd.DataFrame({
     'taxonomy': np.repeat('us-gaap', 11),
     'tag': [
@@ -37,6 +48,6 @@ schema = pd.DataFrame({
     ]
 })
 
-df = get_all_concepts(headers, 'CY2020Q4I', schema)
+df = get_all_concepts(headers, period, schema)
 
 df
