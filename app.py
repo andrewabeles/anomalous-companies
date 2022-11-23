@@ -10,6 +10,11 @@ headers = {
 def year_to_period(year):
     return 'CY' + str(year) + 'Q4I'
 
+@st.cache
+def load_data(headers, period, schema):
+    data = get_all_concepts(headers, period, schema)
+    return data
+
 year = st.select_slider(
     'Select Year',
     options=np.arange(2000, 2022),
@@ -48,6 +53,6 @@ schema = pd.DataFrame({
     ]
 })
 
-df = get_all_concepts(headers, period, schema)
+df = load_data(headers, period, schema)
 
 df
