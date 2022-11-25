@@ -37,7 +37,7 @@ def year_to_period(year):
 
 year = st.select_slider(
     'Select Year',
-    options=np.arange(2000, 2022),
+    options=np.arange(2012, 2022),
     value=2020
 )
 
