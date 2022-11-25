@@ -60,8 +60,7 @@ def plot_corr_matrix(X, title, **kwargs):
         fmt=".2f", # round correlation coefficients to 2 decimal places
         ax=ax
     )
-    plt.title(title)
-    plt.show()
+    return fig
 
 def plot_loadings(pca_results, component, **kwargs):
     fig, ax = plt.subplots(**kwargs)

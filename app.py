@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from src.data import get_all_concepts
+from src.visualize import plot_corr_matrix
 
 headers = {
     'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
@@ -55,4 +56,6 @@ schema = pd.DataFrame({
 
 df = load_data(headers, period, schema)
 
-df
+fig = plot_corr_matrix(df, 'Test')
+
+st.write(fig)
