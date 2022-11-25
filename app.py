@@ -6,6 +6,8 @@ import pickle
 from src.data import get_all_concepts
 from src.visualize import plot_corr_matrix
 
+st.title('Anomalous U.S. Public Companies')
+
 headers = {
     'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
 }
@@ -75,6 +77,12 @@ df_raw = load_data(headers, period, schema)
 pipeline = load_pipeline()
 df_processed = process_data(pipeline, df_raw)
 
+st.metric('Number of Reporting Companies', len(df_raw))
+
+st.subheader('Correlations')
+st.pyplot(plot_corr_matrix(df_raw))
+
+st.subheader('Scatterplot of First Two Principal Components')
 fig, ax = plt.subplots()
 df_processed.plot(x='PC1', y='PC2', kind='scatter', ax=ax)
 st.pyplot(fig)

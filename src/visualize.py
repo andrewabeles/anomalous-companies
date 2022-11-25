@@ -43,7 +43,7 @@ def biv_dist(X, xname, yname, **kwargs):
     )
     plt.show()
 
-def plot_corr_matrix(X, title, **kwargs):
+def plot_corr_matrix(X, **kwargs):
     """Given a dataframe, this function calculates its correlation matrix and displays it as a triangular heatmap."""
     corr = X.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool)) # mask for the upper triangle 
