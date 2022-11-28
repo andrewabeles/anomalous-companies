@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 import seaborn as sns
+from sklearn.cluster import cluster_optics_dbscan
 
 def plot_missing_data(df, **kwargs):
     """Plots a dataframe's proportion of missing values by column as a horizontal bar chart."""
@@ -69,3 +70,19 @@ def plot_loadings(pca_results, component, **kwargs):
     title = "{0} Loadings".format(component)
     plt.title(title)
     plt.show()
+
+def reachability_plot(optics, eps=np.inf, clusters=None, **kwargs):
+    x = np.arange(len(optics.labels_))
+    reachability = optics.reachability_
+    ordering = optics.ordering_
+    fig, ax = plt.subplots(**kwargs)
+    sns.scatterplot(
+        x=x,
+        y=reachability[ordering],
+        hue=clusters[ordering],
+        ax=ax
+    )
+    ax.plot(np.full_like(x, eps, dtype=float), "k-", alpha=0.5, label='threshold')
+    plt.legend()
+    ax.set_ylabel('Reachability (epsilon distance)')
+    return fig
