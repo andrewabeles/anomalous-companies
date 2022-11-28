@@ -80,6 +80,8 @@ def reachability_plot(optics, eps=np.inf, clusters=None, **kwargs):
         x=x,
         y=reachability[ordering],
         hue=clusters[ordering],
+        alpha=0.3,
+        linewidth=0,
         ax=ax
     )
     ax.plot(np.full_like(x, eps, dtype=float), "k-", alpha=0.5, label='threshold')

@@ -90,7 +90,7 @@ def get_all_concepts(headers, period, schema):
     df_long['concept'] = df_long.apply(lambda row: row['tag'] + '_' + row['unit'], axis=1)
     # pivot the dataframe from long form (each row is a company-concept combination) to wide form (each row is a company and each column is a concept)
     df_wide = df_long.pivot(
-        index='cik',
+        index=['cik', 'entityName'],
         columns='concept',
         values='val'
     )
