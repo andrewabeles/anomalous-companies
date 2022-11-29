@@ -17,12 +17,14 @@ headers = {
     'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
 }
 
+FEATURE_NAMES = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6']
+
 @st.cache
 def load_data(headers, period, schema):
     data = get_all_concepts(headers, period, schema)
     return data
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_pipeline():
     pipeline = make_pipeline(
         PowerTransformer(method='yeo-johnson', standardize=True),
@@ -36,9 +38,9 @@ def process_data(pipeline, df_raw):
     X_processed = pipeline.fit_transform(df_raw)
     df_processed = pd.DataFrame(
         X_processed,
-        columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6']
+        columns=FEATURE_NAMES
     )
-    return df_processed
+    return df_processed, pipeline['pca'].components_
 
 @st.cache
 def fit_model(df_processed, eps=3.5):
@@ -100,7 +102,7 @@ schema = pd.DataFrame({
 
 df_raw = load_data(headers, period, schema)
 pipeline = load_pipeline()
-df_processed = process_data(pipeline, df_raw)
+df_processed, pca_components = process_data(pipeline, df_raw)
 model = fit_model(df_processed)
 df_final = pd.concat([df_raw.reset_index(), df_processed], axis=1).copy()
 df_final['anomaly_strength'] = model.reachability_
@@ -164,13 +166,13 @@ col1, col2 = st.columns(2)
 with col1:
     x = st.selectbox(
         'Select X-Axis',
-        options=['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6'],
+        options=FEATURE_NAMES,
         index=0
     )
 with col2:
     y = st.selectbox(
         'Select Y-Axis',
-        options=['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6'],
+        options=FEATURE_NAMES,
         index=1
     )
 fig = px.scatter(
@@ -194,7 +196,40 @@ fig = px.scatter(
 st.plotly_chart(fig)
 
 st.subheader('Principal Components')
-#pipeline['pca'].
+loadings = pd.DataFrame(
+    pca_components.T,
+    columns=FEATURE_NAMES,
+    index=pipeline.feature_names_in_
+).reset_index()
+
+def plot_loadings(loadings, component):
+    fig = px.bar(
+        data_frame=loadings.sort_values(component),
+        x=component,
+        y='index',
+        orientation='h',
+        labels={
+            'index': '',
+            component: 'Correlation'
+        },
+        hover_data={
+            'index': False
+        },
+        title=component
+    )
+    return fig 
+
+col1, col2, col3 = st.columns(3)
+for component in FEATURE_NAMES:
+    if component in ('PC1', 'PC4'):
+        with col1:
+            st.plotly_chart(plot_loadings(loadings, component))
+    elif component in ('PC2', 'PC5'):
+        with col2:
+            st.plotly_chart(plot_loadings(loadings, component))
+    else:
+        with col3:
+            st.plotly_chart(plot_loadings(loadings, component))
 
 st.subheader('Anomalous Companies')
 anomalies = df_final.query("cluster == 'anomalous'").sort_values('anomaly_strength', ascending=False)
