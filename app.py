@@ -227,12 +227,12 @@ st.write(anomalies)
 
 col1, col2 = st.columns(2)
 with col1:
-    anomaly = st.selectbox(
+    anomaly_name = st.selectbox(
         'Select an Anomalous Company',
         options=anomalies['entityName'].unique()
     )
 
-anomaly_data = anomalies.query("entityName == @anomaly")
+anomaly_data = anomalies.query("entityName == @anomaly_name")
 anomaly_data_pc = anomaly_data[FEATURE_NAMES].T
 anomaly_data_pc.columns = ['value']
 
@@ -244,7 +244,8 @@ with col2:
         orientation='h',
         labels={
             'index': ''
-        }
+        },
+        title=anomaly_name
     )
     fig.update_yaxes(autorange='reversed')
     st.plotly_chart(fig)
