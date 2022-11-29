@@ -223,7 +223,7 @@ st.plotly_chart(fig)
 
 st.subheader('Anomalous Companies')
 anomalies = df_final.query("cluster == 'anomalous'").sort_values('anomaly_strength', ascending=False)
-st.write(anomalies)
+st.write(anomalies.style.set_precision(2))
 
 col1, col2 = st.columns(2)
 with col1:
