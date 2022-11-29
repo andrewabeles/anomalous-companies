@@ -59,6 +59,23 @@ def extract_clusters(model, eps):
     clusters = pd.Series(clusters).astype(str).apply(lambda x: 'anomalous' if x == '-1' else 'cluster' + x)
     return clusters
 
+def plot_loadings(loadings, component):
+    fig = px.bar(
+        data_frame=loadings.sort_values(component),
+        x=component,
+        y='index',
+        orientation='h',
+        labels={
+            'index': '',
+            component: 'Correlation'
+        },
+        hover_data={
+            'index': False
+        },
+        title=component
+    )
+    return fig
+
 def year_to_period(year):
     return 'CY' + str(year) + 'Q4I'
 
@@ -103,6 +120,11 @@ schema = pd.DataFrame({
 df_raw = load_data(headers, period, schema)
 pipeline = load_pipeline()
 df_processed, pca_components = process_data(pipeline, df_raw)
+loadings = pd.DataFrame(
+    pca_components.T,
+    columns=FEATURE_NAMES,
+    index=pipeline.feature_names_in_
+).reset_index() 
 model = fit_model(df_processed)
 df_final = pd.concat([df_raw.reset_index(), df_processed], axis=1).copy()
 df_final['anomaly_strength'] = model.reachability_
@@ -161,7 +183,7 @@ with col2:
     fig.update_layout(showlegend=False)
     st.plotly_chart(fig)
 
-st.subheader('Scatterplot of Clustering')
+st.subheader('Cluster Visualization')
 col1, col2 = st.columns(2)
 with col1:
     x = st.selectbox(
@@ -169,68 +191,60 @@ with col1:
         options=FEATURE_NAMES,
         index=0
     )
+    st.plotly_chart(plot_loadings(loadings, x))
+
 with col2:
     y = st.selectbox(
         'Select Y-Axis',
         options=FEATURE_NAMES,
         index=1
     )
+    st.plotly_chart(plot_loadings(loadings, y))
+
 fig = px.scatter(
-    data_frame=df_final,
-    x=x,
-    y=y,
-    color='cluster',
-    opacity=0.3,
-    hover_data={
-        'entityName': True,
-        'cik': True,
-        'cluster': False,
-        'PC1': False,
-        'PC2': False,
-        'PC3': False,
-        'PC4': False,
-        'PC5': False,
-        'PC6': False
-    }
+        data_frame=df_final,
+        x=x,
+        y=y,
+        color='cluster',
+        opacity=0.3,
+        hover_data={
+            'entityName': True,
+            'cik': True,
+            'cluster': False,
+            'PC1': False,
+            'PC2': False,
+            'PC3': False,
+            'PC4': False,
+            'PC5': False,
+            'PC6': False
+        }
 )
 st.plotly_chart(fig)
-
-st.subheader('Principal Components')
-loadings = pd.DataFrame(
-    pca_components.T,
-    columns=FEATURE_NAMES,
-    index=pipeline.feature_names_in_
-).reset_index()
-
-def plot_loadings(loadings, component):
-    fig = px.bar(
-        data_frame=loadings.sort_values(component),
-        x=component,
-        y='index',
-        orientation='h',
-        labels={
-            'index': '',
-            component: 'Correlation'
-        },
-        hover_data={
-            'index': False
-        },
-        title=component
-    )
-    return fig 
-
-col1, col2, col3 = st.columns(3)
-for component in FEATURE_NAMES:
-    if component in ('PC1', 'PC4'):
-        with col1:
-            st.plotly_chart(plot_loadings(loadings, component))
-    elif component in ('PC2', 'PC5'):
-        with col2:
-            st.plotly_chart(plot_loadings(loadings, component))
-    else:
-        with col3:
-            st.plotly_chart(plot_loadings(loadings, component))
 
 st.subheader('Anomalous Companies')
 anomalies = df_final.query("cluster == 'anomalous'").sort_values('anomaly_strength', ascending=False)
 st.write(anomalies)
+
+col1, col2 = st.columns(2)
+with col1:
+    anomaly = st.selectbox(
+        'Select an Anomalous Company',
+        options=anomalies['entityName'].unique()
+    )
+
+anomaly_data = anomalies.query("entityName == @anomaly")
+anomaly_data_pc = anomaly_data[FEATURE_NAMES].T
+anomaly_data_pc.columns = ['value']
+
+with col2:
+    fig = px.bar(
+        data_frame=anomaly_data_pc,
+        x='value',
+        y=anomaly_data_pc.index,
+        orientation='h',
+        labels={
+            'index': ''
+        }
+    )
+    fig.update_yaxes(autorange='reversed')
+    st.plotly_chart(fig)
