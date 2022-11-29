@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 from sklearn.preprocessing import PowerTransformer
 from sklearn.impute import KNNImputer
@@ -58,6 +56,10 @@ def extract_clusters(model, eps):
     )
     clusters = pd.Series(clusters).astype(str).apply(lambda x: 'anomalous' if x == '-1' else 'cluster' + x)
     return clusters
+
+@st.cache
+def df_to_csv(df):
+    return df.to_csv().encode('utf-8')
 
 def plot_loadings(loadings, component):
     fig = px.bar(
@@ -131,8 +133,6 @@ df_final['anomaly_strength'] = model.reachability_
 df_final = df_final.loc[model.ordering_]
 df_final['cluster_ordering'] = np.arange(0, len(df_final))
 
-st.metric('Number of Reporting Companies', len(df_raw))
-
 eps = st.select_slider(
     'Select Anomaly Threshold',
     options=np.arange(0, 30.1, 0.1),
@@ -150,6 +150,7 @@ with col1:
         y='anomaly_strength',
         color='cluster',
         labels={
+            'cluster_ordering': 'Cluster Ordering',
             'anomaly_strength': 'Anomaly Strength',
             'cluster': 'Cluster'
         },
@@ -191,7 +192,6 @@ with col1:
         options=FEATURE_NAMES,
         index=0
     )
-    st.plotly_chart(plot_loadings(loadings, x))
 
 with col2:
     y = st.selectbox(
@@ -199,7 +199,6 @@ with col2:
         options=FEATURE_NAMES,
         index=1
     )
-    st.plotly_chart(plot_loadings(loadings, y))
 
 fig = px.scatter(
         data_frame=df_final,
@@ -221,9 +220,16 @@ fig = px.scatter(
 )
 st.plotly_chart(fig)
 
+col1, col2 = st.columns(2)
+with col1:
+    st.plotly_chart(plot_loadings(loadings, x))
+
+with col2:
+    st.plotly_chart(plot_loadings(loadings, y))
+
 st.subheader('Anomalous Companies')
 anomalies = df_final.query("cluster == 'anomalous'").sort_values('anomaly_strength', ascending=False)
-st.write(anomalies.style.set_precision(2))
+anomalies_csv = df_to_csv(anomalies)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -249,3 +255,13 @@ with col2:
     )
     fig.update_yaxes(autorange='reversed')
     st.plotly_chart(fig)
+
+st.write('All Anomalous Companies')
+st.write(anomalies.style.set_precision(2))
+
+st.download_button(
+    'Download CSV',
+    data=anomalies_csv,
+    file_name='anomalous_companies.csv',
+    mime='text/csv'
+)
