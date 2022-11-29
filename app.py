@@ -4,15 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-import pickle
-from copy import deepcopy
 from sklearn.preprocessing import PowerTransformer
 from sklearn.impute import KNNImputer
 from sklearn.decomposition import PCA
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 from sklearn.pipeline import make_pipeline
 from src.data import get_all_concepts
-from src.visualize import reachability_plot
 
 st.title('Anomalous U.S. Public Companies')
 
@@ -107,6 +104,8 @@ df_processed = process_data(pipeline, df_raw)
 model = fit_model(df_processed)
 df_final = pd.concat([df_raw.reset_index(), df_processed], axis=1).copy()
 df_final['anomaly_strength'] = model.reachability_
+df_final = df_final.loc[model.ordering_]
+df_final['cluster_ordering'] = np.arange(0, len(df_final))
 
 st.metric('Number of Reporting Companies', len(df_raw))
 
@@ -121,16 +120,44 @@ df_final['cluster'] = clusters
 col1, col2 = st.columns(2)
 with col1: 
     st.subheader('Reachability Plot')
-    fig = reachability_plot(model, eps=eps, clusters=clusters)
-    st.pyplot(fig)
+    fig = px.scatter(
+        data_frame=df_final,
+        x='cluster_ordering',
+        y='anomaly_strength',
+        color='cluster',
+        labels={
+            'anomaly_strength': 'Anomaly Strength',
+            'cluster': 'Cluster'
+        },
+        hover_data={
+            'entityName': True,
+            'cluster_ordering': False,
+            'anomaly_strength': False,
+            'cluster': False
+        }
+    )
+    fig.add_hline(y=eps)
+    st.plotly_chart(fig)
 with col2:
     st.subheader('Cluster Distribution')
-    fig, ax = plt.subplots()
-    df_final['cluster'].value_counts().sort_values().plot(kind='barh', ax=ax)
-    for i in ax.containers:
-        ax.bar_label(i,)
-    ax.set_xlabel('Companies')
-    st.pyplot(fig)
+    cluster_dist = pd.DataFrame(df_final['cluster'].value_counts().reset_index())
+    fig = px.bar(
+        data_frame=cluster_dist,
+        y='index',
+        x='cluster',
+        color='index',
+        orientation='h',
+        labels={
+            'index': '',
+            'cluster': 'Companies'
+        },
+        hover_data={
+            'cluster': True,
+            'index': False
+        }
+    )
+    fig.update_layout(showlegend=False)
+    st.plotly_chart(fig)
 
 st.subheader('Scatterplot of Clustering')
 col1, col2 = st.columns(2)
@@ -165,6 +192,9 @@ fig = px.scatter(
     }
 )
 st.plotly_chart(fig)
+
+st.subheader('Principal Components')
+#pipeline['pca'].
 
 st.subheader('Anomalous Companies')
 anomalies = df_final.query("cluster == 'anomalous'").sort_values('anomaly_strength', ascending=False)
