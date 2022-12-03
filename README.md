@@ -6,6 +6,8 @@ Project Organization
 
     ├── README.md          <- The top-level README.
     |
+    ├── requirements.txt   <- Python dependencies. 
+    |
     ├── data
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
@@ -22,6 +24,8 @@ Project Organization
     │   └── visualize.py   <- Data visualization module.
     │  
     |
-    ├── main.ipynb         <- Main Jupyter notebook. White paper format.       
+    ├── main.ipynb         <- Main Jupyter notebook. White paper format.  
+    |
+    ├── app.py             <- Streamlit app.
 
 --------
