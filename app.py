@@ -9,7 +9,33 @@ from sklearn.cluster import OPTICS, cluster_optics_dbscan
 from sklearn.pipeline import make_pipeline
 from src.data import get_all_concepts
 
+st.set_page_config(layout="wide")
+
 st.title('Anomalous U.S. Public Companies')
+about_expander = st.expander('Click here to learn about this app')
+with about_expander:
+    """
+    This app detects anomalous U.S. public companies based on their core financials disclosed to the SEC for a given year. 
+    It uses the following financial metrics: 
+    - Assets (USD)
+    - Current Assets (USD)
+    - Cash and Cash Equivalents at Carrying Value (USD)
+    - Common Stock Authorized Shares (number of shares)
+    - Common Stock Issued Shares (number of shares)
+    - Common Stock Value (USD)
+    - Liabilities and Stockholder Equity (USD)
+    - Liabilities (USD)
+    - Current Liabilities (USD)
+    - Retained Earnings or Accumulated Deficit (USD)
+    - Stockholders Equity (USD)  
+
+    It retrieves data for the given year from the SEC's Extensible Business Markup Language APIs. 
+    These APIs are rate-limited, so please be patient if your request for a given year's data is temporarily blocked.
+
+    Once retrieved, the app transforms the raw data and estimates its missing values. It then clusters the transformed data 
+    and labels companies which do not belong to a cluster as 'anomalous.' The user-chosen threshold determines how many 
+    companies to consider anomalous. The anomalous companies' data is displayed in the table below and can be downloaded as a CSV.
+    """
 
 headers = {
     'User-Agent': 'Andrew Abeles andrewabeles@sandiego.edu'
@@ -84,7 +110,8 @@ def year_to_period(year):
 year = st.select_slider(
     'Select Year',
     options=np.arange(2012, 2022),
-    value=2020
+    value=2020,
+    help='Select which year of disclosed financials to retrieve from the SEC.'
 )
 
 period = year_to_period(year)
@@ -136,7 +163,8 @@ df_final['cluster_ordering'] = np.arange(0, len(df_final))
 eps = st.select_slider(
     'Select Anomaly Threshold',
     options=np.arange(0, 30.1, 0.1),
-    value=3.5
+    value=3.5,
+    help='Select a threshold reachability value above which companies will be classified as outliers. Reachability represents how different a company is from those most similar.'
 )
 clusters = extract_clusters(model, eps=eps)
 df_final['cluster'] = clusters
@@ -197,7 +225,9 @@ with col2:
     y = st.selectbox(
         'Select Y-Axis',
         options=FEATURE_NAMES,
-        index=1
+        index=1,
+        help="""Select which principal components to visualize. Principal components are higher-level representations of the original variables.
+                The bar plots below show the components' correlations with the original variables and are used to understand what each component represents."""
     )
 
 fig = px.scatter(
@@ -235,7 +265,8 @@ col1, col2 = st.columns(2)
 with col1:
     anomaly_name = st.selectbox(
         'Select an Anomalous Company',
-        options=anomalies['entityName'].unique()
+        options=anomalies['entityName'].unique(),
+        help='Select an anomalous company to view its principal component values. You can also view its raw financials by searching with CTRL-F in the table below.'
     )
 
 anomaly_data = anomalies.query("entityName == @anomaly_name")
