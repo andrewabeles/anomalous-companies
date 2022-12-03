@@ -257,7 +257,7 @@ with col2:
     st.plotly_chart(fig)
 
 st.write('All Anomalous Companies')
-st.write(anomalies.style.set_precision(2))
+st.write(anomalies.style.format(precision=2))
 
 st.download_button(
     'Download CSV',
