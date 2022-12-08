@@ -1,7 +1,20 @@
-# anomalous-companies
-University of San Diego Applied Data Science Capstone Project
+# Anomalous Public Company Detection
+Applied Data Science Master's Program Capstone Project  
+Shiley Marcos School of Engineering / University of San Diego  
 
-Project Organization
+**Authors**  
+- [Andrew Abeles](aabeles@sandiego.edu)
+- [Emina Belekanich](ebelekanich@sandiego.edu) 
+
+## Objectives 
+1. Cluster U.S. public companies based on their most commonly disclosed financial metrics. 
+2. Identify anomalous U.S. public companies based on their most commonly disclosed financial metrics.
+
+## Deliverables 
+1. [White Paper](https://github.com/andrewabeles/anomalous-companies/blob/main/main.ipynb) 
+2. [Web Application](https://andrewabeles-anomalous-companies-app-hmfo7e.streamlit.app/)
+
+## Project Organization
 ------------
 
     ├── README.md          <- The top-level README.
@@ -24,7 +37,7 @@ Project Organization
     │   └── visualize.py   <- Data visualization module.
     │  
     |
-    ├── main.ipynb         <- Main Jupyter notebook. White paper format.  
+    ├── main.ipynb         <- Project white paper.   
     |
     ├── app.py             <- Streamlit app.
 
