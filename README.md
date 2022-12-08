@@ -1,4 +1,4 @@
-# Anomalous Public Company Detection
+# Anomaly Detection in Public Company Financial Statements Using Density-Based Clustering
 Applied Data Science Master's Program Capstone Project  
 Shiley Marcos School of Engineering / University of San Diego  
 
